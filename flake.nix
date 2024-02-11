@@ -77,7 +77,7 @@
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, home-manager-unstable, darwin, nur, nixgl, nixvim, nixvim-unstable, doom-emacs, hyprland, plasma-manager, ... }:   # Function telling flake which inputs to use
     let
       vars = {                                                              # Variables Used In Flake
-        user = "matthias";
+        user = "guru";
         location = "$HOME/.setup";
         terminal = "kitty";
         editor = "nvim";

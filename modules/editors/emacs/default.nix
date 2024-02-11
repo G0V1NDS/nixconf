@@ -26,7 +26,7 @@
       CONFIG="/home/${vars.user}/.emacs.d"
 
       if [ ! -d "$CONFIG" ]; then
-        ${pkgs.git}/bin/git clone https://github.com/matthiasbenaets/emacs.d.git $CONFIG
+        ${pkgs.git}/bin/git clone https://github.com/G0V1NDS/emacs.d.git $CONFIG
       fi
 
       chown -R ${vars.user}:users /home/${vars.user}/.emacs.d
