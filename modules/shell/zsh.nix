@@ -9,13 +9,18 @@
     shell = pkgs.zsh;
   };
 
-  home-manager.users.${vars.user} = {
-    home.file.".config/shell" = {
-      source = ./shell;
+  home-manager.users.${vars.user} =
+  let
+    config_dir_shell = "shell";
+    config_dir_zsh= "zsh";
+  in
+  {
+    home.file.".config/${config_dir_shell}" = {
+      source = ./${config_dir_shell};
       recursive = true;
     };
-    home.file.".config/zsh" = {
-      source = ./zsh;
+    home.file.".config/${config_dir_zsh}" = {
+      source = ./${config_dir_zsh};
       recursive = true;
     };
   };

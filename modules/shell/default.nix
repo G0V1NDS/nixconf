@@ -13,5 +13,6 @@
 [
   ./git.nix
   ./zsh.nix
+  ./lf.nix
   ./direnv.nix
 ]

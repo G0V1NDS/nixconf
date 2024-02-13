@@ -18,9 +18,13 @@
       nixd
     ];
 
-    home-manager.users.${vars.user} = {
-      home.file.".config/nvim" = {
-        source = ./nvim;
+    home-manager.users.${vars.user} =
+    let
+      config_dir = "nvim";
+    in
+    {
+      home.file.".config/${config_dir}" = {
+        source = ./${config_dir};
         recursive = true;
       };
     };

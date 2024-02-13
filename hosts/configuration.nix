@@ -183,13 +183,6 @@ in
       bat
       # vscode
       # kate
-      # # For lf preview
-      # ffmpeg
-      # ffmpegthumbnailer
-      # imagemagick
-      # ghostscript
-      # poppler
-      # wkhtmltopdf
       # thunderbird
     ] ++
     (with unstable; [

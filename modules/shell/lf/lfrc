@@ -1,0 +1,172 @@
+# Luke's lf settings
+
+# Basic vars
+set shell sh
+set shellopts '-eu'
+set ifs "\n"
+set scrolloff 10
+set icons
+set period 1
+set hidden
+set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml"
+# Using modified time here for sorting, https://github.com/gokcehan/lf/issues/1323#issuecomment-1619078744
+set sortby time; set info time
+set reverse true
+
+# Vars that depend on environmental variables
+$lf -remote "send $id set cleaner ${XDG_CONFIG_HOME:-$HOME/.config}/lf/cleaner"
+$lf -remote "send $id set previewer ${XDG_CONFIG_HOME:-$HOME/.config}/lf/previewer"
+
+
+# cmds/functions
+# Check this tips section for more customizations: https://github.com/gokcehan/lf/wiki/Tips#edit-and-reload-config-file
+# cmd open $OPENER $fx
+cmd open ${{
+  test -L $fx && fx=$(readlink -f $fx)
+  OPENER="${XDG_CONFIG_HOME:-$HOME/.config}/lf/opener"
+  $OPENER $fx
+}}
+
+cmd open-choose ${{
+  test -L $fx && fx=$(readlink -f $fx)
+  OPENER="${XDG_CONFIG_HOME:-$HOME/.config}/lf/opener"
+  OPENER_CHOOSE="true" $OPENER $fx
+}}
+
+cmd edit ${{
+    if [ -d "$fx" ]; then
+        nvim -u /Users/govind.r/.config/nvim/lua/initlsp.lua -- $fx
+    else
+        $EDITOR "$fx"
+    fi
+}}
+
+cmd mkdir $mkdir -p "$(echo $* | tr ' ' '\ ')"
+
+cmd delete ${{
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	set -f
+	printf "%s\n\t" "$fx"
+	printf "delete?[y/N]"
+	read ans
+	[ $ans = "y" ] && rm -rf -- $fx
+}}
+
+${{ mkdir -p ~/.trash }}
+
+cmd trash ${{
+    mv $fx ~/.trash
+}}
+
+cmd moveto ${{
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	set -f
+	clear; echo "Move to where?"
+	dest="$(cut -d'	' -f2- ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf | sed 's|~|$HOME|' )" &&
+	for x in $fx; do
+		eval mv -iv \"$x\" \"$dest\"
+	done &&
+	notify-send "🚚 File(s) moved." "File(s) moved to $dest."
+}}
+
+cmd copyto ${{
+	clear; tput cup $(($(tput lines)/3)); tput bold
+	set -f
+	clear; echo "Copy to where?"
+	dest="$(cut -d'	' -f2- ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf | sed 's|~|$HOME|' )" &&
+	for x in $fx; do
+		eval cp -ivr \"$x\" \"$dest\"
+	done &&
+	notify-send "📋 File(s) copied." "File(s) copies to $dest."
+}}
+
+cmd slink %{{
+    set -- $(cat ~/.local/share/lf/files)
+    mode="$1"
+    shift
+    if [ "$#" -lt 1 ]; then
+        lf -remote "send $id echo no files to link"
+        exit 0
+    fi
+    case "$mode" in
+        # symbolically copy mode is indicating a soft link
+        copy) ln -sr -t . -- "$@";;
+        # while a move mode is indicating a hard link
+        move) ln -t . -- "$@";;
+    esac
+    rm ~/.local/share/lf/files
+    lf -remote "send clear"
+}}
+
+cmd yank_name &{{
+	echo -n $(basename $f) | pbcopy
+	# echo -n $(basename $f) | xclip -selection clipboard
+}}
+
+cmd yank_path &{{
+	echo -n $f | pbcopy
+	# echo -n $f | xclip -selection clipboard
+}}
+
+cmd z %{{
+	result="$(zoxide query --exclude $PWD $@)"
+	lf -remote "send $id cd $result"
+}}
+
+cmd zi ${{
+	result="$(zoxide query -i)"
+	lf -remote "send $id cd $result"
+}}
+
+cmd toggle_preview %{{
+    if [ "$lf_preview" = "true" ]; then
+        lf -remote "send $id :set preview false; set ratios 1:5"
+    else
+        lf -remote "send $id :set preview true; set ratios 1:2:3"
+    fi
+}}
+
+
+cmd setbg "$1"
+cmd bulkrename $vidir
+
+# Bindings
+map <c-f> $lf -remote "send $id select '$(fzf)'"
+map J $lf -remote "send $id cd $(cut -d'	' -f2 ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf)"
+map gh
+map g top
+map d
+map dd trash
+map dD delete
+map C copyto
+map M moveto
+map <c-n> push :mkdir<space>
+# map <c-r> reload
+map <c-r> zi
+map <enter> shell
+map x $$f
+map X !$f
+
+map o open
+map O open-choose
+map e edit
+
+map I :rename; cmd-home
+map a rename
+map A :rename; cmd-end
+map B bulkrename
+map b $setbg $f
+
+map <c-e> down
+map <c-y> up
+map V push :!nvim<space>
+
+map y
+map yn yank_name
+map yp yank_path
+map yy copy
+map zp toggle_preview
+
+map p
+map pp paste
+map ps slink
