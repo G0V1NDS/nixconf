@@ -44,17 +44,30 @@ in
     kernelPackages = pkgs.linuxPackages_latest;
   };
 
+  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.${vars.user} = {              # System User
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" "audio" "camera" "networkmanager" "lp" "scanner" ];
+    extraGroups = [ "wheel" "video" "audio" "camera" "networkmanager" "lp" ];
+    packages = with pkgs; [
+
+    ];
   };
 
-  time.timeZone = "Europe/Brussels";        # Time zone and Internationalisation
-  i18n = {
-    defaultLocale = "en_US.UTF-8";
-    extraLocaleSettings = {
-      LC_MONETARY = "nl_BE.UTF-8";
-    };
+  # Set your time zone.
+  time.timeZone = "Asia/Kolkata";
+  # Select internationalisation properties.
+  i18n.defaultLocale = "en_IN";
+
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "en_IN";
+    LC_IDENTIFICATION = "en_IN";
+    LC_MEASUREMENT = "en_IN";
+    LC_MONETARY = "en_IN";
+    LC_NAME = "en_IN";
+    LC_NUMERIC = "en_IN";
+    LC_PAPER = "en_IN";
+    LC_TELEPHONE = "en_IN";
+    LC_TIME = "en_IN";
   };
 
   console = {
@@ -99,12 +112,17 @@ in
       nano              # Text Editor
       nix-tree          # Browse Nix Store
       pciutils          # Manage PCI
-      ranger            # File Manager
+      lf                # LF file manager
       smartmontools     # Disk Health
-      tldr              # Helper
+      tealdeer          # Helper
       usbutils          # Manage USB
       wget              # Retriever
       xdg-utils         # Environment integration
+      jq                # JSON Processor
+      fzf               # Fuzzy finder
+      fd                # Find fast
+      sd                # Find and replace sed alternative
+      eza               # modern replacement of ls
 
       # Video/Audio
       alsa-utils        # Audio Control
@@ -137,6 +155,51 @@ in
       # Other Packages Found @
       # - ./<host>/default.nix
       # - ../modules
+      curl
+      xclip
+      gcc
+      cargo
+      luajitPackages.luarocks
+      nixd
+      nodejs_21
+      go
+      python3
+      rustc
+      # tree-sitter
+      neovim
+      kitty
+      # wezterm
+      # alacritty
+      # nerdfonts
+      # fira-code-nerdfont
+      # jetbrains-mono
+      # victor-mono
+      zoxide
+      fzf
+      eza
+      ripgrep
+      sd
+      fd
+      lf
+      jq
+      tmux
+      bottom
+      # delta
+      # lazygit
+      # lazydocker
+      # tealdeer
+      # asdf-vm
+      bat
+      # vscode
+      # kate
+      # # For lf preview
+      # ffmpeg
+      # ffmpegthumbnailer
+      # imagemagick
+      # ghostscript
+      # poppler
+      # wkhtmltopdf
+      # thunderbird
     ] ++
     (with unstable; [
       # Apps
@@ -150,9 +213,9 @@ in
 
   hardware.pulseaudio.enable = false;
   services = {
-    printing = {                            # CUPS
-      enable = true;
-    };
+    # printing = {                            # CUPS
+    #   enable = false;
+    # };
     pipewire = {                            # Sound
       enable = true;
       alsa = {

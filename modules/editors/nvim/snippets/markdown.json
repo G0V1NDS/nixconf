@@ -1,0 +1,49 @@
+{
+  "## TODOs": {
+    "prefix": "todo",
+    "body": [
+      "## TODOs",
+      "",
+      "- ${0}"
+    ],
+    "description": "Adds TODO header"
+  },
+  "Code Python": {
+    "prefix": "python",
+    "body": [
+      "```python",
+      "${0}",
+      "```"
+    ],
+    "description": "Python code block"
+  },
+  "Details summary": {
+    "prefix": "details",
+    "body": [
+      "<details>",
+      "<summary>${0}</summary>",
+      "",
+      "```",
+      "${1}",
+      "```",
+      "",
+      "</details>"
+    ],
+    "description": "Expandable content"
+  },
+  "Jira code SQL": {
+    "prefix": "codesql",
+    "body": [
+      "```sql",
+      "{color:green}[QUERY]{color}",
+      "{code:sql}",
+      "${0}",
+      "{code}",
+      "{color:red}[ROLLBACK]{color}",
+      "{code:sql}",
+      "{code}",
+      "```"
+    ],
+    "description": "Jira code snippet for SQL"
+  }
+}

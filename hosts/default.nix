@@ -27,6 +27,25 @@ let
   lib = nixpkgs.lib;
 in
 {
+  r510jx = lib.nixosSystem {                                  # Work Profile
+    inherit system;
+    specialArgs = {
+      inherit inputs system unstable vars;
+      host = {
+        hostName = "work";
+      };
+    };
+    modules = [
+      ./r510jx
+      ./configuration.nix
+
+      home-manager.nixosModules.home-manager {
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+      }
+    ];
+  };
+
   beelink = lib.nixosSystem {                               # Desktop Profile
     inherit system;
     specialArgs = {                                         # Pass Flake Variable
