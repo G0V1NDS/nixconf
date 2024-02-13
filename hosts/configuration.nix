@@ -156,15 +156,6 @@ in
       # - ./<host>/default.nix
       # - ../modules
       curl
-      xclip
-      gcc
-      cargo
-      luajitPackages.luarocks
-      nixd
-      nodejs_21
-      go
-      python3
-      rustc
       # tree-sitter
       neovim
       kitty

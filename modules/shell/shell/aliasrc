@@ -1,0 +1,89 @@
+#!/bin/sh
+
+# Use neovim for vim if present.
+[ -x "$(command -v nvim)" ] && alias vim="nvim" vimdiff="nvim -d"
+
+# Verbosity and settings that you pretty much just always are going to want.
+alias \
+	cp="cp -iv" \
+	mv="mv -iv" \
+	rm="rm -vI" \
+	mkd="mkdir -pv" \
+	yt="youtube-dl --add-metadata -i" \
+	yta="yt -x -f bestaudio/best" \
+	ffmpeg="ffmpeg -hide_banner" \
+    fda='fd -IH' \
+    rga='rg -uuu' \
+    :q='exit' \
+    ,q='exit' \
+    lzg='lazygit' \
+
+# Docker related aliases
+alias \
+    lzd='DOCKER_HOST=unix://$HOME/.colima/docker.sock  lazydocker' \
+    dc='docker compose'
+
+# Colorize commands when possible.
+alias \
+	ls="ls -hN --color=auto --group-directories-first" \
+	grep="grep --color=auto" \
+	diff="diff --color=auto" \
+	ccat="highlight --out-format=ansi"
+
+# These common commands are just too long! Abbreviate them.
+alias \
+	ka="killall" \
+	g="git" \
+	trem="transmission-remote" \
+	YT="youtube-viewer" \
+	sdn="sudo shutdown -h now" \
+	f='$FILE' \
+	e='$EDITOR' \
+	v='$EDITOR' \
+  c='$EDITOR -u ${MYVIMRCLSP} --listen ~/.cache/nvim/sockets/nvim-$RANDOM.sock' \
+  code='$EDITOR -u ${MYVIMRCLSP} --listen ~/.cache/nvim/sockets/nvim-$RANDOM.sock' \
+	p="sudo pacman" \
+	xi="sudo xbps-install" \
+	xr="sudo xbps-remove -R" \
+	xq="xbps-query" \
+    tt="taskwarrior-tui" \
+    lf="lfimg" \
+	# z="zathura" \
+
+alias \
+	magit="nvim -c MagitOnly" \
+	ref='shortcuts >/dev/null; source ${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutrc ; source ${XDG_CONFIG_HOME:-$HOME/.config}/shell/zshnameddirrc' \
+	weath='less -S ${XDG_DATA_HOME:-$HOME/.local/share}/weatherreport' \
+	tmux='tmux -u -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf' \
+    tl="tldr --list | fzf --preview 'tldr {} --color always' | xargs navi --tldr" \
+
+
+if (( $+commands[eza] )); then
+    alias ls="eza -b --git --icons"
+    alias recent="eza -b --git -snew --icons"
+    tree () {
+        local depth dirsonly
+        while [[ $1 == -L || $1 == -d ]]; do
+            if [[ $1 == -L ]]; then
+                depth=(-L $2)
+                shift 2
+            fi
+            if [[ $1 == -d ]]; then
+                dirsonly=-D
+                shift
+            fi
+        done
+        eza -bT --icons --git $depth $dirsonly $@
+    }
+else
+    alias ls="ls --color=auto"
+    alias tree="tree -C"
+    alias recent="ls -rt"
+fi
+
+alias lsa="ls -a"
+
+alias lsl="ls -l"
+
+
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc-private" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc-private"

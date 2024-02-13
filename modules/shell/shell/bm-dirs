@@ -1,0 +1,27 @@
+# You can add comments to these files with #
+cac ${XDG_CACHE_HOME:-$HOME/.cache}
+cf  ${XDG_CONFIG_HOME:-$HOME/.config}
+D   ${XDG_DOWNLOAD_DIR:-$HOME/Downloads}
+d   ${XDG_DOCUMENTS_DIR:-$HOME/Documents}
+dt  ${XDG_DATA_HOME:-$HOME/.local/share}
+h   $HOME
+m   ${XDG_MUSIC_DIR:-$HOME/Music}
+mn  /mnt
+pp  ${XDG_PICTURES_DIR:-$HOME/Pictures}
+sc  $HOME/.local/bin
+src $HOME/.local/src
+vv  ${XDG_VIDEOS_DIR:-$HOME/Videos}
+dot  ${MY_DOTFILES_DIR:-$HOME/voidrice}
+pdot  ${MY_DOTFILES_DIR/Private:-$HOME/voidrice/Private}
+work   $HOME/Workspace
+csk   $HOME/Workspace/csk
+prac   $HOME/Workspace/practice
+order   $HOME/Workspace/csk/csx/ordering-module/order-service/
+rust  $HOME/Workspace/practice/rust
+vw   "${VIMWIKI_DIR}"
+vww  "${VIMWIKI_DIR_WORK}"
+vwp  "${VIMWIKI_DIR_PERSONAL}"
+vwi  "${VIMWIKI_DIR_INTERVIEWS}"
+vwd  "${VIMWIKI_DIR_DISCUSSIONS}"
+vwa  "${VIMWIKI_DIR_ACTIVE_TASKS}"
+vwm  "${MOST_USED_VIMWIKI_DIR}"

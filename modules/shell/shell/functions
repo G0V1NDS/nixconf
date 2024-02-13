@@ -1,0 +1,278 @@
+#!/bin/bash
+
+# sudo() {
+    # Enables touch id for sudo on mac
+    # unset -f sudo
+    # if [[ "$(uname)" == 'Darwin' ]] && ! grep 'pam_tid.so' /etc/pam.d/sudo --silent; then
+      # sudo sed -i -e '1s;^;auth       sufficient     pam_tid.so\n;' /etc/pam.d/sudo
+    # fi
+    # sudo "$@"
+# }
+
+# Add global functions here
+function docker_ip() {
+    container_name=$1
+    docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name
+}
+
+
+function is_docker_container_running() {
+    compose_file="$1"
+    service_name="$2"
+
+    # container_name=$(get_docker_container_name_by_service "$compose_file" "$service_name")
+    # [[ $(docker container ls --filter="name=\"${container_name}\"" --format="{{.Names}}") = "$container_name" ]]
+    [[ $(docker compose -f "$compose_file" ps --services | grep "$service_name") = "$service_name" ]]
+}
+
+function get_docker_project_name() {
+    compose_file="$1"
+
+    project_dir=$(dirname "${compose_file}")
+    project_name=$(basename "${project_dir}")
+    print "$project_name"
+}
+
+function get_docker_container_name_by_service() {
+    compose_file="$1"
+    service_name="$2"
+
+    project_name=$(get_docker_project_name "$compose_file")
+    container_name="${project_name}-${service_name}-1"
+    print "$container_name"
+}
+
+
+function docker_start_service() {
+    # Here profile name is same as service name
+    compose_file="$1"
+    service_name="$2"
+    compose_profiles="$3"
+
+    if is_docker_container_running "$compose_file" "$service_name"; then
+        echo -e "Service ${service_name} is already running"
+    else
+        echo -e "Starting service ${service_name}..."
+        # COMPOSE_PROFILES="$compose_profiles" docker compose -f "$compose_file"  up -d
+        docker compose -f "$compose_file"  restart "$service_name"
+    fi
+}
+
+function docker_copy_tag() {
+    # When you have multiple tag available for same image,
+    # you can choose the image first and then choose one tag to be used as `$new_tag`, which is by default latest
+    new_tag="${1:-latest}"
+
+    # Selecting image and tag to be copied
+    image_name=$(docker image ls --filter="dangling=false" --format="{{ .Repository }}" | uniq | fzf)
+    tag=$(docker image ls --format="{{ .Tag }}" "$image_name" | fzf)
+
+    # Making the copy
+    docker tag "$image_name":"$tag" "$image_name":"$new_tag"
+    echo -e "\nCopying \`${image_name}:${tag}\` as \`${new_tag}\` image\n"
+    docker image ls --filter="dangling=false" "$image_name"
+}
+
+function dctagc(){
+    # Alias function for docker_copy_tag
+    docker_copy_tag "$@"
+}
+
+function switch_iterm2_profile() {
+    # Iterm allows switching profile with this escape sequence
+    echo -ne "\033]50;SetProfile=$1\a"
+}
+
+raise_pr() {
+    raise=${1:=1}
+
+    # Gets pull request URL for selected destination branch from current branch
+    inside_git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
+    # Return if not a git repository
+    if ! [ "$inside_git_repo" ]; then
+      echo "Not in git repo"
+      return
+    fi
+
+    # Choosing destination branch from available top branch choices
+    # Instruct if main brances are not defined, and consider all recently used local branches
+
+    main_branch_str=$(git config --get core.mainbranches)
+    if ! [[ "${main_branch_str}" ]]; then
+        echo "Main branches are not defined in local git config"
+        echo -e "Define them using below command, in this sample adding stage and master as two main branches\n"
+        echo '```\ngit config --replace-all core.mainbranches "stage\\nmaster"\n\n```'
+
+        echo "\n\nConsidering all recently used local branches by default\n\n"
+    fi
+    dest_branch="$(git branch --color=always --sort=-committerdate | grep -v '/HEAD\\s'  | fzf --ansi | sed 's/^..//' | awk '{print $1}' | sed "s#^remotes/[^/]*/##")"
+
+
+    # Using current branch as source branch
+    source_branch=$(git rev-parse --abbrev-ref HEAD)
+
+    declare -a hotfix_prefixes=("FIX" "VVIMP")
+    # Checking if source branch name starts with filtered hotfix suffix
+    for prefix in "${hotfix_prefixes[@]}"; do
+        is_hotfix_branch=$(rg -i "$prefix" <<< "${source_branch}")
+        if [[ "${is_hotfix_branch}" ]]; then
+            break
+        fi
+    done
+
+    if [[ -z "${is_hotfix_branch}" ]]; then
+        # Validating if all source branch commits are present in previous lower branch
+        echo -e "\nValidating if all source branch commits are present in previous lower branch:\n" >&2
+
+        check_lower_branch_missed_commits "${dest_branch}" "${main_branch_str}"
+        # Returning on error
+        if [ $? -ne 0 ]; then
+           return
+        fi
+    else
+        echo "\nSkipping diff check since it is a hotfix\n"
+    fi
+
+    echo -e "\nGetting repo URL..." >&2
+    # Getting repo path from configured origin remote
+    repo_push_url=$(git remote get-url --push origin)
+
+    # Getting repo path based on URL type, logic will vary if repo ssh or http
+    if [[ $repo_push_url == "https://"* ]]; then
+        repo_path=$(echo $repo_push_url | cut -d "/" -f4- | cut -d "." -f1)
+    else
+        repo_path=$(echo $repo_push_url | cut -d ":" -f2 | cut -d "." -f1)
+    fi
+
+    echo -e "Repo Path: ${repo_path}\nSource branch: ${source_branch}\nDestination branch: ${dest_branch}\n\n"
+    if [[ $repo_push_url == *bitbucket* ]]; then
+        pr_url="https://bitbucket.org/${repo_path}/pull-requests/new?source=${source_branch}&dest=${dest_branch}"
+    elif [[ $repo_push_url == *gitlab* ]]; then
+        pr_url="https://gitlab.com/${repo_path}/merge_requests/new?merge_request%5Bsource_branch%5D=${source_branch}&merge_request%5Btarget_branch%5D=${dest_branch}"
+    elif [[ $repo_push_url == *github* ]]; then
+        pr_url="https://github.com/${repo_path}/compare/${dest_branch}...${source_branch}"
+    fi
+
+    echo "${pr_url}"
+
+    if [[ $raise == "1" ]]; then
+        # Raises pull request against selected destination branch from current branch
+        open "${pr_url}"
+    fi
+}
+
+function get_lower_branch(){
+    # Lower branch: A branch lower in hierarchy then the target branch, which should have all the commits before moving to target branch
+    destination_branch=$1
+    shift
+    main_branches=("$@")
+
+    echo -e "main_branches: ${main_branches}" >&2
+    echo -e "destination_branch: ${destination_branch}" >&2
+    branch_position=-1
+
+
+    count=0
+    for branch in "${main_branches[@]}"; do
+        if [[ "${branch}" = "${destination_branch}" ]]; then
+            branch_position=${count}
+            break
+        fi
+        count=$((count + 1))
+    done
+
+    local lower_branch
+    if [[ $branch_position -ge 1 ]]; then
+        lower_branch_position=$((${branch_position} - 1))
+
+        # Zsh and bash compatible way to access list index by using offset:limit
+        lower_branch=${main_branches[@]:$lower_branch_position:1}
+
+        echo -e "lower_branch: ${lower_branch}" >&2
+    else
+        echo -e "This is the lowest main branch, no need to check missing commits for this." >&2
+    fi
+
+    echo "${lower_branch}"
+}
+
+function check_lower_branch_missed_commits(){
+    # Check for missing commits in lower branch
+    # Here lower branch refers to a branch lower in hierarchy then the target branch, which should have all the commits before moving to target branch
+    dest_branch=$1
+    main_branche_str=$2
+
+    if [[ -z "${main_branche_str}" ]]; then
+        main_branch_str=$(git config --get core.mainbranches)
+    fi
+    if [[ -z "${dest_branch}" ]]; then
+        dest_branch=$(echo -e "${main_branch_str}" | fzf)
+    fi
+
+    main_branches=()
+    while IFS= read -r branch; do main_branches+=("${branch}"); done <<< $(echo -e "${main_branch_str}")
+    source_branch=$(git rev-parse --abbrev-ref HEAD)
+    lower_branch=$(get_lower_branch "${dest_branch}" "${main_branches[@]}")
+
+    if [ -z "${lower_branch}" ]; then
+        echo -e "SUCCESS : No lower branch to compare with" >&2
+    else
+        echo -e "\nChecking branch logs..." >&2
+        echo -e "\nFetching latest changes..." >&2
+        git fetch -a
+        echo -e "\ngit log origin/${lower_branch}..origin/${source_branch} --no-merges\n" >&2
+        log_diff=$(git log origin/"${lower_branch}..origin/${source_branch}" --no-merges)
+        log_cmd_return=$(echo "${log_diff}" | head -c1 | wc -c)
+        if [ -n "${log_diff}" ] && [ "${log_cmd_return}" -ne 0 ]; then
+            comment_msg="FAILED : the changes are not merged in [${lower_branch}]. Please merge your changes in [$lower_branch] before merging in [${dest_branch}]\n\n${log_diff}"
+            echo -e "${comment_msg}" >&2
+
+            return "${log_cmd_return}"
+        else
+            echo -e "SUCCESS : All the changes are merged in lower hierarchy branch" >&2
+        fi
+    fi
+}
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/functions-private" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/functions-private"
+
+function urldecode(){
+    decoded_value=$(python3 -c "import sys, urllib.parse as ul; \
+        print(ul.unquote_plus(sys.argv[1]))" $1)
+    echo "${decoded_value}"
+}
+
+function urlencode(){
+    encoded_value=$(python3 -c "import sys, urllib.parse as ul; \
+        print (ul.quote_plus(sys.argv[1]))" $1)
+    echo "${encoded_value}"
+}
+
+function kill_port(){
+    PORT_NUMBER=$1
+    if [[ "${PORT_NUMBER}" ]]; then
+        lsof -i tcp:${PORT_NUMBER} | rg ssh | awk '{print $2}' | xargs kill
+    fi
+}
+
+function get_colors() {
+    curl -s https://gist.githubusercontent.com/HaleTom/89ffe32783f89f403bba96bd7bcd1263/raw/e50a28ec54188d2413518788de6c6367ffcea4f7/print256colours.sh | bash
+}
+
+function truecolors_test(){
+    width=$1
+    awk -v term_cols="${width:-$(tput cols || echo 80)}" -v term_lines="${height:-1}" 'BEGIN{
+        s="/\\";
+        total_cols=term_cols*term_lines;
+        for (colnum = 0; colnum<total_cols; colnum++) {
+            r = 255-(colnum*255/total_cols);
+            g = (colnum*510/total_cols);
+            b = (colnum*255/total_cols);
+            if (g>255) g = 510-g;
+            printf "\033[48;2;%d;%d;%dm", r,g,b;
+            printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
+            printf "%s\033[0m", substr(s,colnum%2+1,1);
+            if (colnum%term_cols==term_cols) printf "\n";
+        }
+        printf "\n";
+    }'
+}
