@@ -18,10 +18,12 @@
     home.file.".config/${config_dir_shell}" = {
       source = ./${config_dir_shell};
       recursive = true;
+      force = true;
     };
     home.file.".config/${config_dir_zsh}" = {
       source = ./${config_dir_zsh};
       recursive = true;
+      force = true;
     };
   };
 

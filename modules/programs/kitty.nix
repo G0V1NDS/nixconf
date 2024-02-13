@@ -8,10 +8,15 @@ let
   colors = import ../theming/colors.nix;
 in
 {
-  home-manager.users.${vars.user} = {
-    home.file.".config/kitty" = {
-      source = ./kitty;
+  home-manager.users.${vars.user} =
+  let
+    config_dir = "kitty";
+  in
+  {
+    home.file.".config/${config_dir}" = {
+      source = ./${config_dir};
       recursive = true;
+      force = true;
     };
     # programs = {
     #   kitty = {
