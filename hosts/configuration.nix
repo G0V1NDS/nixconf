@@ -149,6 +149,7 @@ in
       firefox           # Browser
       brave             # Browser
       google-chrome     # Browser
+      telegram-desktop  # Telegram client
 
       # File Management
       p7zip             # Zip Encryption
