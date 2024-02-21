@@ -36,6 +36,11 @@
         url = "github:nix-community/NUR";                                   # Requires "nur.nixosModules.nur" to be added to the host modules
       };
 
+      firefox-addons = {
+        url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+
       nixgl = {                                                             # Fixes OpenGL With Other Distros.
         url = "github:guibou/nixGL";
         inputs.nixpkgs.follows = "nixpkgs";
@@ -72,8 +77,15 @@
         inputs.nixpkgs.follows = "nixpkgs";
         inputs.home-manager.follows = "nixpkgs";
       };
+      # secrets = {
+      #   url = "git+ssh://git@github.com/G0V1NDS/nix-secrets";
+      #   inputs.nixpkgs.follows = "nixpkgs";
+      #   # inputs.agenix.follows = "agenix";
+      #   # inputs.flake-utils.follows = "utils";
+      # };
     };
 
+  # outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, home-manager-unstable, darwin, nur, nixgl, nixvim, nixvim-unstable, doom-emacs, hyprland, plasma-manager, secrets, ... }:   # Function telling flake which inputs to use
   outputs = inputs @ { self, nixpkgs, nixpkgs-unstable, nixos-hardware, home-manager, home-manager-unstable, darwin, nur, nixgl, nixvim, nixvim-unstable, doom-emacs, hyprland, plasma-manager, ... }:   # Function telling flake which inputs to use
     let
       vars = {                                                              # Variables Used In Flake

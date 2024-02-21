@@ -11,6 +11,7 @@
 #
 
 [
+  ./firefox.nix
   ./alacritty.nix
   ./eww.nix
   ./flatpak.nix
