@@ -178,20 +178,20 @@ in
     dconf.enable = true;
   };
 
-  hardware.pulseaudio.enable = false;
+  hardware.pulseaudio.enable = true;
   services = {
     # printing = {                            # CUPS
     #   enable = false;
     # };
-    pipewire = {                            # Sound
-      enable = true;
-      alsa = {
-        enable = true;
-        support32Bit = true;
-      };
-      pulse.enable = true;
-      jack.enable = true;
-    };
+    # pipewire = {                            # Sound
+    #   enable = true;
+    #   alsa = {
+    #     enable = true;
+    #     support32Bit = true;
+    #   };
+    #   pulse.enable = true;
+    #   jack.enable = true;
+    # };
     openssh = {                             # SSH
       enable = true;
       allowSFTP = true;                     # SFTP
