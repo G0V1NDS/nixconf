@@ -87,6 +87,7 @@ in
     source-code-pro
     jetbrains-mono
     font-awesome                            # Icons
+    victor-mono
     corefonts                               # MS
     (nerdfonts.override {                   # Nerdfont Icons override
       fonts = [
@@ -102,33 +103,40 @@ in
       VISUAL = "${vars.editor}";
     };
     systemPackages = with pkgs; [           # System-Wide Packages
-      # Terminal
-      terminal          # Terminal Emulator
-      btop              # Resource Manager
+      neovim
+      kitty
+      curl
+      wget              # Retriever
       coreutils         # GNU Utilities
       git               # Version Control
       killall           # Process Killer
-      lshw              # Hardware Config
-      nano              # Text Editor
-      nix-tree          # Browse Nix Store
-      pciutils          # Manage PCI
       lf                # LF file manager
-      smartmontools     # Disk Health
       tealdeer          # Helper
-      usbutils          # Manage USB
-      wget              # Retriever
-      xdg-utils         # Environment integration
       jq                # JSON Processor
       fzf               # Fuzzy finder
       fd                # Find fast
       sd                # Find and replace sed alternative
       eza               # modern replacement of ls
+      zoxide
+      ripgrep
+      tmux
+      bottom
+      delta
+      lazygit
+      lazydocker
+      asdf-vm
+      bat
+      clipboard-jh      # Cross-platform clipboard manager
+
+      usbutils          # Manage USB
+      lshw              # Hardware Config
+      nix-tree          # Browse Nix Store
+      pciutils          # Manage PCI
+      xdg-utils         # Environment integration
 
       # Video/Audio
-      alsa-utils        # Audio Control
-      feh               # Image Viewer
-      image-roll        # Image Viewer
       linux-firmware    # Proprietary Hardware Blob
+      alsa-utils        # Audio Control
       mpv               # Media Player
       pavucontrol       # Audio Control
       pipewire          # Audio Server/Control
@@ -139,48 +147,23 @@ in
       # Apps
       appimage-run      # Runs AppImages on NixOS
       firefox           # Browser
+      brave             # Browser
       google-chrome     # Browser
-      remmina           # XRDP & VNC Client
 
       # File Management
-      gnome.file-roller # Archive Manager
-      okular            # PDF Viewer
-      pcmanfm           # File Browser
       p7zip             # Zip Encryption
       rsync             # Syncer - $ rsync -r dir1/ dir2/
       unzip             # Zip Files
       unrar             # Rar Files
       zip               # Zip
+      zathura           # PDF viewer
 
       # Other Packages Found @
       # - ./<host>/default.nix
       # - ../modules
-      curl
       # tree-sitter
-      neovim
-      kitty
       # wezterm
       # alacritty
-      # nerdfonts
-      # fira-code-nerdfont
-      # jetbrains-mono
-      # victor-mono
-      zoxide
-      fzf
-      eza
-      ripgrep
-      sd
-      fd
-      lf
-      jq
-      tmux
-      bottom
-      # delta
-      # lazygit
-      # lazydocker
-      # tealdeer
-      # asdf-vm
-      bat
       # vscode
       # kate
       # thunderbird
