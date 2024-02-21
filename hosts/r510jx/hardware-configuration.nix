@@ -68,7 +68,8 @@
     }; # To load wireguard cert in nm-applet: nmcli connection import type wireguard file <config file>
     bridges = {
       "br0" = {
-        interfaces = [ "enp0s31f6" ];
+        # Replace `enp*` with output from `ip link show`
+        interfaces = [ "enp4s0f1" ];
       };
     };
     interfaces = {
