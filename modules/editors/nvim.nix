@@ -1,10 +1,6 @@
-#
 #  Neovim
 #
-
-{ config, lib, pkgs, vars, ...}:
-
-{
+{ config, lib, pkgs, vars, ... }: {
   config = {
     environment.systemPackages = with pkgs; [
       xclip
@@ -15,14 +11,17 @@
       rustc
       cargo
       luajitPackages.luarocks
+      # LSPs not available with mason
       nixd
+      marksman
+      # Nix formatters
+      alejandra
+      nixpkgs-fmt
+      nixfmt
     ];
 
-    home-manager.users.${vars.user} =
-    let
-      config_dir = "nvim";
-    in
-    {
+    home-manager.users.${vars.user} = let config_dir = "nvim";
+    in {
       home.file.".config/${config_dir}" = {
         source = ./${config_dir};
         recursive = true;
