@@ -25,11 +25,6 @@
       recursive = true;
       force = true;
     };
-    home.file."./.zprofile" = {
-      source = ./${config_dir_shell}/profile;
-      recursive = true;
-      force = true;
-    };
   };
 
   # programs = {
